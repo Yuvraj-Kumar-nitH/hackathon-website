@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>via · find your way home, together</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root{
+    --bg:#FBFAF8; --header:rgba(251,250,248,.86);
+    --card:#ffffff; --card2:#F7F6F2; --chip:rgba(44,44,41,.05);
+    --text:#2C2C29; --muted:#6b6b68; --faint:#9a9a95;
+    --line:rgba(44,44,41,.10); --line2:rgba(44,44,41,.05);
+    --track:rgba(44,44,41,.15);
+    --accent:#2f6f4f; --accent-strong:#285c42;
+    --accent-soft:rgba(47,111,79,.08); --accent-line:rgba(47,111,79,.22); --accent-text:#2f6f4f;
+    --amber-soft:rgba(217,119,6,.08); --amber-line:rgba(217,119,6,.25); --amber-text:#92600a;
+    --card-shadow:0 20px 45px -26px rgba(44,44,41,.18);
+    --soft-shadow:0 10px 28px -18px rgba(44,44,41,.14);
+    --btn-shadow:0 14px 30px -14px rgba(47,111,79,.45);
+    --glow:rgba(47,111,79,.07);
+    color-scheme:light;
+  }
+  .dark{
+    --bg:#151130; --header:rgba(21,17,48,.86);
+    --card:#211b46; --card2:#2b2456; --chip:rgba(236,234,255,.08);
+    --text:#eceaff; --muted:#a9a3d2; --faint:#7b75a3;
+    --line:rgba(236,234,255,.11); --line2:rgba(236,234,255,.06);
+    --track:rgba(236,234,255,.16);
+    --accent:#4f9b74; --accent-strong:#63b189;
+    --accent-soft:rgba(130,200,162,.11); --accent-line:rgba(130,200,162,.25); --accent-text:#9fd6b6;
+    --amber-soft:rgba(251,191,36,.11); --amber-line:rgba(251,191,36,.28); --amber-text:#fbd38d;
+    --card-shadow:0 20px 45px -26px rgba(0,0,0,.8);
+    --soft-shadow:0 10px 28px -18px rgba(0,0,0,.7);
+    --btn-shadow:0 14px 30px -14px rgba(79,155,116,.55);
+    --glow:rgba(122,92,255,.22);
+    color-scheme:dark;
+  }
+  body{ background: var(--bg) radial-gradient(720px 340px at 50% -120px, var(--glow), transparent 70%); }
+  .tc{ transition: background-color .45s ease, color .45s ease, border-color .45s ease; }
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes slideUp{from{opacity:0;transform:translateY(56px)}to{opacity:1;transform:none}}
+  @keyframes popIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+  @keyframes dashFlow{to{stroke-dashoffset:-16}}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  @keyframes blink{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-2px)}}
+  .anim-fadeUp{animation:fadeUp .55s cubic-bezier(.2,.7,.3,1) both}
+  .anim-fadeIn{animation:fadeIn .3s ease both}
+  .anim-slideUp{animation:slideUp .45s cubic-bezier(.2,.7,.3,1) both}
+  .anim-popIn{animation:popIn .3s cubic-bezier(.2,.7,.3,1) both}
+  .dash-flow{animation:dashFlow 2.6s linear infinite}
+  .bob{animation:bob 2.8s ease-in-out infinite}
+  .typing{animation:blink 1.2s infinite}
+  .no-scrollbar::-webkit-scrollbar{display:none}
+  .no-scrollbar{scrollbar-width:none}
+  select{font-family:Inter}
+</style>
+</head>
+<body class="font-sans antialiased tc" style="color:var(--text)">
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const {useState,useEffect,useRef} = React;
+
+/* ---------------- data ---------------- */
+const NOW = new Date().getFullYear();
+const YEARS = [NOW-1, NOW, NOW+1, NOW+2];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const COLLEGES = [
+ "IIT Delhi","IIT Bombay","IIT Madras","IIT Kharagpur","IIT Kanpur","IIT Roorkee","IIT Guwahati","IIT Hyderabad","IIT BHU Varanasi",
+ "BITS Pilani","BITS Goa","IIIT Bangalore","IIIT Hyderabad","IIIT Delhi",
+ "NIT Trichy","NIT Warangal","NIT Surathkal","NIT Calicut","NIT Jaipur","NIT Kurukshetra","NIT Bhopal","NIT Rourkela","NIT Hamirpur",
+ "VIT Vellore","SRM Chennai","Manipal Institute","Anna University","COEP Pune","RV College","Jadavpur University","Delhi University"
+];
+
+const CITIES = [
+ "Delhi","Mumbai","Bengaluru","Chennai","Hyderabad","Pune","Kolkata","Ahmedabad","Jaipur","Lucknow","Chandigarh",
+ "Indore","Bhopal","Nagpur","Surat","Vadodara","Patna","Bhubaneswar","Ranchi","Jamshedpur","Varanasi","Kanpur","Prayagraj","Agra",
+ "Dehradun","Shimla","Ludhiana","Amritsar","Kochi","Thiruvananthapuram","Coimbatore","Mysuru","Visakhapatnam","Vijayawada",
+ "Goa","Nashik","Kota","Udaipur","Jodhpur","Guwahati"
+];
+
+const MODES = ["Bus","Train","Car","Flight"];
+const LUGGAGE = ["1 Backpack","1 Suitcase","2 Bags","Heavy Luggage"];
+const VIBES = ["Quiet","Chatty","Music","Sleeping","Foodie","Early Morning","Late Night"];
+const GENDERS = ["Female","Male","Non-binary","Prefer not to say"];
+const FILTERS = ["All","Bus","Train","Car","Flight","Same gender","Verified","Round trip"];
+
+/* -------- companion generator -------- */
+const FIRST_M = ["Aarav","Rohan","Vikram","Aditya","Kartik","Dhruv","Harsh","Neel","Sahil","Kunal","Arnav","Omkar","Farhan","Bhaskar","Aritra","Vihaan","Arjun","Kabir","Reyansh","Krish","Ishaan","Shaurya","Atharv","Advik","Pranav","Rudra","Kian","Yuvraj","Zayan","Aryan","Dev","Nirvaan","Darsh","Veer","Laksh","Parth","Samrat","Tanish","Ritvik","Mohit"];
+const FIRST_F = ["Priya","Sneha","Ananya","Diya","Tanvi","Meghana","Aisha","Pooja","Ishita","Zoya","Riya","Soumya","Divya","Sanjana","Prachi","Lakshmi","Nandini","Shruti","Sara","Meera","Kiara","Anika","Ridhima","Myra","Aadhya","Navya","Sanya","Tara","Urvi","Prisha","Ritika","Shreya","Kavya","Neha","Simran","Bhavika","Charu","Eshita","Gauri","Ira"];
+const LAST = ["S.","M.","K.","R.","T.","P.","N.","G.","B.","D.","V.","A.","J.","L.","C.","H.","W.","F."];
+
+const COLLEGE_HOME = {
+ "IIT Delhi":"Delhi","IIT Bombay":"Mumbai","IIT Madras":"Chennai","IIT Kharagpur":"Kolkata","IIT Kanpur":"Kanpur",
+ "IIT Roorkee":"Dehradun","IIT Guwahati":"Guwahati","IIT Hyderabad":"Hyderabad","IIT BHU Varanasi":"Varanasi",
+ "BITS Pilani":"Jaipur","BITS Goa":"Goa","IIIT Bangalore":"Bengaluru","IIIT Hyderabad":"Hyderabad","IIIT Delhi":"Delhi",
+ "NIT Trichy":"Chennai","NIT Warangal":"Hyderabad","NIT Surathkal":"Bengaluru","NIT Calicut":"Kochi","NIT Jaipur":"Jaipur",
+ "NIT Kurukshetra":"Chandigarh","NIT Bhopal":"Bhopal","NIT Rourkela":"Ranchi","NIT Hamirpur":"Chandigarh",
+ "VIT Vellore":"Chennai","SRM Chennai":"Chennai","Manipal Institute":"Bengaluru","Anna University":"Chennai",
+ "COEP Pune":"Pune","RV College":"Bengaluru","Jadavpur University":"Kolkata","Delhi University":"Delhi"
+};
+
+const COLLEGE_EMAIL = {
+ "IIT Delhi":"iitd.ac.in","IIT Bombay":"iitb.ac.in","IIT Madras":"iitm.ac.in","IIT Kharagpur":"iitkgp.ac.in","IIT Kanpur":"iitk.ac.in",
+ "IIT Roorkee":"iitr.ac.in","IIT Guwahati":"iitg.ac.in","IIT Hyderabad":"iith.ac.in","IIT BHU Varanasi":"iitbhu.ac.in",
+ "BITS Pilani":"pilani.bits-pilani.ac.in","BITS Goa":"goa.bits-pilani.ac.in","IIIT Bangalore":"iiitb.ac.in","IIIT Hyderabad":"iiit.ac.in","IIIT Delhi":"iiitd.ac.in",
+ "NIT Trichy":"nitt.edu","NIT Warangal":"nitw.ac.in","NIT Surathkal":"nitk.edu.in","NIT Calicut":"nitc.ac.in","NIT Jaipur":"mnit.ac.in",
+ "NIT Kurukshetra":"nitkkr.ac.in","NIT Bhopal":"manit.ac.in","NIT Rourkela":"nitrkl.ac.in","NIT Hamirpur":"nith.ac.in",
+ "VIT Vellore":"vit.ac.in","SRM Chennai":"srmist.edu.in","Manipal Institute":"manipal.edu","Anna University":"annauniv.edu",
+ "COEP Pune":"coep.org.in","RV College":"rvce.edu.in","Jadavpur University":"jadavpuruniversity.ac.in","Delhi University":"du.ac.in"
+};
+
+const POPULAR = ["Delhi","Jaipur","Mumbai","Bengaluru","Hyderabad","Chennai","Pune","Kolkata"];
+
+function seededRandom(seed){ let s = seed % 233280; return () => { s = (s*9301 + 49297) % 233280; return s/233280; }; }
+const pick = (rand, arr) => arr[Math.floor(rand()*arr.length)];
+
+function generateBuddies(){
+  const out = []; let id = 1;
+  const months = ["Dec","Dec","Jan","Jan","Feb"];
+  COLLEGES.forEach((college, ci) => {
+    const rand = seededRandom(ci*7919 + 13);
+    const homeCity = COLLEGE_HOME[college];
+    const destPool = CITIES.filter(c => c !== homeCity);
+    const chosen = POPULAR.filter(c => c !== homeCity);
+    const numCities = 8 + Math.floor(rand()*3);
+    while(chosen.length < numCities && chosen.length < destPool.length){
+      const c = destPool[Math.floor(rand()*destPool.length)];
+      if(!chosen.includes(c)) chosen.push(c);
+    }
+    chosen.forEach((city, xi) => {
+      const rand2 = seededRandom(ci*131 + xi*101 + 7);
+      const perCity = 3 + Math.floor(rand2()*3);
+      for(let k=0;k<perCity;k++){
+        const rand3 = seededRandom(ci*100003 + xi*1009 + k*17 + 3);
+        const gender = rand3() > 0.5 ? "Male" : "Female";
+        const first = gender==="Male" ? pick(rand3,FIRST_M) : pick(rand3,FIRST_F);
+        const name = first + " " + pick(rand3,LAST);
+        const lugCount = 1 + Math.floor(rand3()*2);
+        const lug = []; while(lug.length < lugCount){ const l = pick(rand3,LUGGAGE); if(!lug.includes(l)) lug.push(l); }
+        const vibeCount = 1 + Math.floor(rand3()*2);
+        const vibes = []; while(vibes.length < vibeCount){ const v = pick(rand3,VIBES); if(!vibes.includes(v)) vibes.push(v); }
+        out.push({
+          id: String(id++), name, gender, college, from: college, to: city,
+          date: {month: pick(rand3,months), day: 10 + Math.floor(rand3()*18), year: NOW},
+          mode: pick(rand3,MODES), luggage: lug, vibes,
+          genderPref: rand3() > 0.5 ? "Open to all" : "Same gender only",
+          roundTrip: rand3() > 0.55,
+          rating: Math.round((4.2 + rand3()*0.8)*10)/10,
+          trips: 3 + Math.floor(rand3()*23),
+        });
+      }
+    });
+  });
+  return out;
+}
+const BUDDIES = generateBuddies();
+
+/* ---------------- helpers ---------------- */
+const shortFrom = s => s.replace(/^(NIT|IIT|BITS|IIIT|VIT|SRM|COEP|RV)\s+/,'');
+const fmtDate = d => `${d.month} ${d.day}, ${d.year}`;
+const initials = n => n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const AV = ['bg-emerald-100 text-emerald-700','bg-amber-100 text-amber-700','bg-sky-100 text-sky-700','bg-rose-100 text-rose-600','bg-violet-100 text-violet-600'];
+const avClass = s => AV[(s.charCodeAt(0) + s.length*7) % AV.length];
+const modeIcon = m => ({Bus:'bus',Train:'train',Car:'car',Flight:'plane'}[m]);
+const store = {
+ get:k=>{ try{return localStorage.getItem(k)}catch(e){return null} },
+ set:(k,v)=>{ try{localStorage.setItem(k,v)}catch(e){} }
+};
+
+/* email verification */
+const emailValid = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((e||'').trim());
+function checkEmail(email, college){
+  const e = (email||'').trim().toLowerCase();
+  const valid = emailValid(e);
+  const dom = (COLLEGE_EMAIL[college]||'').toLowerCase();
+  const matchesCollege = valid && dom && e.endsWith('@'+dom);
+  const academic = valid && /\.(ac\.in|edu|edu\.in)$/.test(e);
+  return { valid, matchesCollege, academic, verified: valid && (matchesCollege || academic) };
+}
+
+/* ---------------- icons ---------------- */
+const P = {
+ arrowRight:<><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></>,
+ arrowLeft:<><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></>,
+ arrowDown:<><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></>,
+ pencil:<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>,
+ ghost:<><path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/></>,
+ bus:<><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></>,
+ train:<><path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/><path d="m9 15-1-1"/><path d="m15 15 1-1"/><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></>,
+ car:<><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></>,
+ plane:<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>,
+ badge:<><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></>,
+ backpack:<><path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"/><path d="M8 10h8"/></>,
+ repeat:<><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></>,
+ pin:<><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></>,
+ ticket:<><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/></>,
+ rupee:<><path d="M6 3h12"/><path d="M6 8h12"/><path d="m6 13 8.5 8"/><path d="M6 13h3"/><path d="M9 13c6.667 0 6.667-10 0-10"/></>,
+ plus:<><path d="M5 12h14"/><path d="M12 5v14"/></>,
+ user:<><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></>,
+ shield:<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>,
+ calendar:<><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></>,
+ chevronDown:<path d="m6 9 6 6 6-6"/>,
+ chevronUp:<path d="m18 15-6-6-6 6"/>,
+ check:<path d="M20 6 9 17l-5-5"/>,
+ compass:<><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></>,
+ mail:<><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m22 7-10 6L2 7"/></>,
+ inbox:<><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></>,
+ send:<><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></>,
+ sun:<><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></>,
+ moon:<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>,
+};
+const Ic = ({n, className="w-4 h-4"}) => (
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className}>{P[n]}</svg>
+);
+const Star = ({className="w-3 h-3"}) => (
+ <svg viewBox="0 0 24 24" fill="currentColor" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+);
+
+/* ---------------- primitives ---------------- */
+const Label = ({children, className=''}) => (
+ <div className={`text-[10px] uppercase tracking-[0.16em] mb-1 ${className}`} style={{color:'var(--faint)'}}>{children}</div>
+);
+
+function Toggle({on, onChange}){
+ return (
+  <button onClick={()=>onChange(!on)} className="relative h-6 w-11 shrink-0 rounded-full tc transition-colors duration-300" style={{background: on?'var(--accent)':'var(--track)'}}>
+   <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-300 ${on?'translate-x-5':''}`} style={{transitionTimingFunction:'cubic-bezier(.34,1.56,.64,1)'}}/>
+  </button>
+ );
+}
+const ToggleRow = ({label, helper, on, set}) => (
+ <div className="flex items-start justify-between gap-3">
+  <div>
+   <div className="text-sm" style={{color:'var(--text)'}}>{label}</div>
+   {helper && <div className="text-xs mt-0.5 leading-relaxed" style={{color:'var(--faint)'}}>{helper}</div>}
+  </div>
+  <Toggle on={on} onChange={set}/>
+ </div>
+);
+
+function Sel({value, onChange, options, className="", numeric=false}){
+ return (
+  <div className={"relative tc "+className} style={{color:'var(--text)'}}>
+   <select value={value} onChange={e=>onChange(numeric? +e.target.value : e.target.value)}
+    className="w-full appearance-none bg-transparent text-sm py-2 pl-2.5 pr-7 focus:outline-none cursor-pointer">
+    {options.map(o=><option key={o} value={o}>{o}</option>)}
+   </select>
+   <Ic n="chevronDown" className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" style={{color:'var(--faint)'}}/>
+  </div>
+ );
+}
+
+function DateFields({d, set}){
+ const dim = new Date(d.year, MONTHS.indexOf(d.month)+1, 0).getDate();
+ const upd = p => {
+  const nd = {...d, ...p};
+  const dm = new Date(nd.year, MONTHS.indexOf(nd.month)+1, 0).getDate();
+  if(nd.day > dm) p = {...p, day: dm};
+  set(p);
+ };
+ return (
+  <div className="flex items-center gap-1.5">
+   <div className="tc rounded-2xl border" style={{background:'var(--card2)',borderColor:'var(--line2)'}}><Sel className="w-[76px]" value={d.month} onChange={v=>upd({month:v})} options={MONTHS}/></div>
+   <div className="tc rounded-2xl border" style={{background:'var(--card2)',borderColor:'var(--line2)'}}><Sel className="w-[62px]" numeric value={d.day} onChange={v=>upd({day:v})} options={Array.from({length:dim},(_,i)=>i+1)}/></div>
+   <div className="tc rounded-2xl border" style={{background:'var(--card2)',borderColor:'var(--line2)'}}><Sel className="w-[78px]" numeric value={d.year} onChange={v=>upd({year:v})} options={YEARS}/></div>
+  </div>
+ );
+}
+
+function Avatar({name, size="h-10 w-10 text-sm"}){
+ return <div className={`${size} rounded-full flex items-center justify-center font-medium ${avClass(name)}`}>{initials(name)}</div>;
+}
+
+const Rating = ({b, className=""}) => b.you ? (
+ <span className={`inline-flex items-center gap-1 text-xs ${className}`} style={{color:'var(--accent-text)'}}>New traveler</span>
+) : (
+ <span className={`inline-flex items-center gap-1 text-xs ${className}`} style={{color:'var(--muted)'}}>
+  <Star className="w-3 h-3 text-amber-400"/>
+  <span className="font-medium" style={{color:'var(--text)'}}>{b.rating.toFixed(1)}</span>
+  <span style={{color:'var(--faint)'}}>·</span> {b.trips} trips
+ </span>
+);
+
+function Pill({active, onClick, children}){
+ return (
+  <button onClick={onClick}
+   className="tc px-3.5 py-1.5 rounded-full text-xs whitespace-nowrap border transition-all duration-300 active:scale-95"
+   style={active
+    ? {background:'var(--accent)', color:'#fff', borderColor:'transparent', boxShadow:'var(--soft-shadow)'}
+    : {background:'var(--card)', color:'var(--muted)', borderColor:'var(--line)'}}>
+   {children}
+  </button>
+ );
+}
+const Chip = ({children}) => (
+ <span className="tc inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px]" style={{background:'var(--chip)', color:'var(--muted)'}}>{children}</span>
+);
+const VerifiedChip = () => (
+ <span className="tc inline-flex items-center gap-0.5 text-[10px] font-medium rounded-full px-1.5 py-0.5 border" style={{color:'var(--accent-text)', background:'var(--accent-soft)', borderColor:'var(--accent-line)'}}>
+  <Ic n="badge" className="w-3 h-3"/>Verified
+ </span>
+);
+const GhostNote = ({children}) => (
+ <div className="tc anim-fadeUp mt-2 flex items-center gap-2 text-xs rounded-2xl px-3 py-2 border" style={{color:'var(--accent-text)', background:'var(--accent-soft)', borderColor:'var(--accent-line)'}}>
+  <Ic n="ghost" className="w-3.5 h-3.5 shrink-0"/>{children}
+ </div>
+);
+const RoundBtn = ({onClick, title, children}) => (
+ <button onClick={onClick} title={title}
+  className="tc h-9 w-9 rounded-full border flex items-center justify-center transition-all duration-300 active:scale-90 hover:-translate-y-px"
+  style={{background:'var(--card)', borderColor:'var(--line)', color:'var(--muted)', boxShadow:'var(--soft-shadow)'}}>
+  {children}
+ </button>
+);
+
+function ThemeToggle({dark, setDark}){
+ return (
+  <button onClick={()=>setDark(!dark)} title="Toggle theme"
+   className="tc relative h-8 w-8 rounded-full border overflow-hidden flex items-center justify-center transition-all duration-300 active:scale-90"
+   style={{background:'var(--card)', borderColor:'var(--line)'}}>
+   <span className="absolute transition-all duration-500 text-amber-500" style={dark?{opacity:0, transform:'rotate(-90deg) scale(.4)'}:{opacity:1, transform:'none'}}>
+    <Ic n="sun" className="w-4 h-4"/>
+   </span>
+   <span className="absolute transition-all duration-500" style={{color:'#cfc8ff', ...(dark?{opacity:1, transform:'none'}:{opacity:0, transform:'rotate(90deg) scale(.4)'})}}>
+    <Ic n="moon" className="w-4 h-4"/>
+   </span>
+  </button>
+ );
+}
+
+/* ---------------- app ---------------- */
+function App(){
+ const [dark,setDark] = useState(()=> store.get('via-dark')==='1');
+ useEffect(()=>{
+  document.documentElement.classList.toggle('dark', dark);
+  document.body.classList.toggle('dark', dark);
+  store.set('via-dark', dark?'1':'0');
+ },[dark]);
+
+ const [screen,setScreen] = useState('home');
+ const [prev,setPrev] = useState('home');
+ const [me,setMe] = useState({name:'', email:'', verified:false, gender:'', college:'NIT Hamirpur', vibes:[], genderPref:'Open to all', ghost:false});
+ const [search,setSearch] = useState({from:'NIT Hamirpur', to:'Jaipur', month:'Dec', day:15, year:NOW, returnTrip:false});
+ const [recent,setRecent] = useState(null);
+ const [filter,setFilter] = useState('All');
+ const [selected,setSelected] = useState(null);
+ const [requests,setRequests] = useState({});
+ const [chatWith,setChatWith] = useState(null);
+ const [msgs,setMsgs] = useState({});
+ const [typing,setTyping] = useState(null);
+ const [input,setInput] = useState('');
+ const [fareOpen,setFareOpen] = useState(false);
+ const [fare,setFare] = useState('1200');
+ const [mine,setMine] = useState([]);
+ const [toasts,setToasts] = useState([]);
+ const [trip,setTrip] = useState(null);
+ const chatEndRef = useRef(null);
+
+ /* incoming join requests */
+ const [inbox,setInbox] = useState([
+  {id:'req1', name:'Riya C.', gender:'Female', college:'NIT Hamirpur', from:'NIT Hamirpur', to:'Jaipur', date:{month:'Dec',day:15,year:NOW}, mode:'Bus', luggage:['1 Suitcase'], vibes:['Music','Foodie'], genderPref:'Open to all', roundTrip:false, rating:4.8, trips:10, verified:true, msg:'Hey! Saw your trip to Jaipur — mind if I join? I take the same morning bus.', status:'pending'},
+  {id:'req2', name:'Mohit D.', gender:'Male', college:'NIT Hamirpur', from:'NIT Hamirpur', to:'Jaipur', date:{month:'Dec',day:16,year:NOW}, mode:'Car', luggage:['2 Bags'], vibes:['Chatty','Music'], genderPref:'Open to all', roundTrip:true, rating:4.5, trips:7, verified:true, msg:'Driving down to Jaipur on the 16th — have a spare seat if you want to split costs.', status:'pending'},
+ ]);
+ const pendingCount = inbox.filter(r=>r.status==='pending').length;
+
+ const toast = t => {
+  const id = Date.now()+Math.random();
+  setToasts(x=>[...x,{id,t}]);
+  setTimeout(()=>setToasts(x=>x.filter(y=>y.id!==id)), 2600);
+ };
+
+ const go = s => { setPrev(screen); setScreen(s); };
+ const openProfile = () => go('profile');
+ const openCreate = () => {
+  setTrip({from:search.from, to:search.to, month:search.month, day:search.day, year:search.year, mode:'Bus', luggage:[], vibes:[], genderPref:'Open to all', roundTrip:false, visible:true});
+  go('create');
+ };
+ const find = () => { setRecent({from:search.from, to:search.to}); setFilter('All'); setScreen('results'); };
+
+ const all = [...mine, ...BUDDIES];
+ const roster = [...all, ...inbox];
+
+ const base = all.filter(b => b.from===search.from && b.to===search.to);
+ let list = base;
+ if(['Bus','Train','Car','Flight'].includes(filter)) list = list.filter(b=>b.mode===filter);
+ if(filter==='Same gender') list = list.filter(b => me.gender ? b.gender===me.gender : b.genderPref==='Same gender only');
+ if(filter==='Round trip') list = list.filter(b=>b.roundTrip);
+ list = [...list].sort((a,b)=>(b.rating||0)-(a.rating||0));
+
+ const onFilter = f => {
+  if(f==='Same gender' && !me.gender) toast('Tip: add your gender in your profile for better matching');
+  setFilter(f);
+ };
+
+ const request = b => {
+  setRequests(r=>({...r,[b.id]:'pending'}));
+  setTimeout(()=>{
+   setRequests(r=>({...r,[b.id]:'accepted'}));
+   toast(`${b.name.split(' ')[0]} accepted your request`);
+  },1700);
+ };
+
+ const seedMsgs = b => {
+  const dep = b.mode==='Bus' ? 'the 9 AM Volvo' : b.mode==='Train' ? 'the 9 AM train' : b.mode==='Flight' ? 'the morning flight' : 'the 9 AM ride';
+  return [
+   {from:'them', text:`Hey! Looks like we're both heading to ${b.to} on ${fmtDate(b.date)}.`},
+   {from:'me', text:`Yes! Are you taking ${dep} from campus?`},
+   {from:'them', text:`Yes, ${dep} from the campus gate. Let's meet at the gate at 8:40.`},
+  ];
+ };
+
+ const openChat = b => {
+  setMsgs(m => m[b.id] ? m : {...m, [b.id]: seedMsgs(b)});
+  setChatWith(b.id); setSelected(null); setScreen('chat');
+ };
+
+ const sendMsg = () => {
+  const t = input.trim(); if(!t || !chatWith) return;
+  const id = chatWith;
+  setMsgs(m=>({...m,[id]:[...(m[id]||[]),{from:'me',text:t}]}));
+  setInput('');
+  if(typing!==id){
+   setTimeout(()=>setTyping(id), 500);
+   setTimeout(()=>{
+    setTyping(x=>x===id?null:x);
+    setMsgs(m=>({...m,[id]:[...(m[id]||[]),{from:'them',text:'Sounds good. See you at the gate!'}]}));
+   },2100);
+  }
+ };
+
+ const quick = kind => {
+  const b = roster.find(x=>x.id===chatWith);
+  const push = msg => setMsgs(m=>({...m,[chatWith]:[...(m[chatWith]||[]),msg]}));
+  if(kind==='loc') push({from:'me', kind:'loc', text:'Live location shared'});
+  if(kind==='ticket') push({from:'me', kind:'ticket', text:`Ticket shared · ${b.mode}, Seat 12`});
+  if(kind==='split') setFareOpen(true);
+ };
+
+ const markPaid = () => {
+  const n = Math.max(0, parseFloat(fare)||0);
+  setMsgs(m=>({...m,[chatWith]:[...(m[chatWith]||[]),{from:'sys',text:`Fare settled · ₹${Math.round(n/2)} each`}]}));
+  setFareOpen(false); toast('Marked as paid');
+ };
+
+ /* incoming request simulation + actions */
+ const makeRequest = (t) => {
+  const r = Math.random;
+  const gender = r()>0.5?'Male':'Female';
+  const first = gender==='Male'? FIRST_M[Math.floor(r()*FIRST_M.length)] : FIRST_F[Math.floor(r()*FIRST_F.length)];
+  const name = first+' '+LAST[Math.floor(r()*LAST.length)];
+  return {
+   id:'req-'+Date.now()+'-'+Math.floor(r()*10000),
+   name, gender, college:t.from, from:t.from, to:t.to,
+   date:{month:t.month, day:t.day, year:t.year},
+   mode: MODES[Math.floor(r()*MODES.length)],
+   luggage:[LUGGAGE[Math.floor(r()*LUGGAGE.length)]],
+   vibes:[VIBES[Math.floor(r()*VIBES.length)]],
+   genderPref:'Open to all', roundTrip: r()>0.6,
+   rating: Math.round((4.2+r()*0.8)*10)/10,
+   trips: 3+Math.floor(r()*23),
+   verified:true,
+   msg:'Hey! Saw your trip to '+t.to+' — can I join you?',
+   status:'pending'
+  };
+ };
+ const simulateRequests = (t) => {
+  setTimeout(()=>{ setInbox(x=>[makeRequest(t), makeRequest(t), ...x]); toast('2 new join requests received'); }, 2200);
+ };
+
+ const acceptReq = id => { setInbox(x=>x.map(r=>r.id===id?{...r,status:'accepted'}:r)); toast('Request accepted — say hi!'); };
+ const declineReq = id => { setInbox(x=>x.filter(r=>r.id!==id)); toast('Request declined'); };
+
+ const publish = () => {
+  if(!trip.luggage.length) return toast('Select at least one luggage option');
+  const d = {month:trip.month, day:trip.day, year:trip.year};
+  const item = {id:'you-'+Date.now(), you:true, name: me.name || 'You', gender:me.gender, college:trip.from, from:trip.from, to:trip.to, date:d, mode:trip.mode, luggage:[...trip.luggage], vibes:[...trip.vibes], genderPref:trip.genderPref, roundTrip:trip.roundTrip, verified:me.verified};
+  if(me.ghost || !trip.visible){ toast('Trip saved privately — you stay invisible'); }
+  else { setMine(x=>[item,...x]); toast('Trip published'); simulateRequests(trip); }
+  setFilter('All'); setScreen('results');
+ };
+
+ const saveProfile = () => {
+  if(!me.name.trim()) return toast('Add your name first');
+  const chk = checkEmail(me.email, me.college);
+  if(me.email.trim() && !chk.valid) return toast('Enter a valid email address');
+  setMe(m=>({...m, verified: chk.verified}));
+  toast(chk.verified ? 'Profile verified ✓' : 'Profile saved');
+  setScreen(prev==='profile' ? 'home' : prev);
+ };
+
+ useEffect(()=>{ if(chatEndRef.current) chatEndRef.current.scrollIntoView({behavior:'smooth'}); },[msgs,chatWith,typing]);
+
+ const sel = roster.find(b=>b.id===selected);
+ const cb = roster.find(b=>b.id===chatWith);
+
+ /* live email check for profile */
+ const liveChk = checkEmail(me.email, me.college);
+ let emailHint = {text:'Use your college email to get the verified tag.', color:'var(--faint)'};
+ if(me.email.trim() && !liveChk.valid) emailHint = {text:'Enter a valid email address.', color:'var(--amber-text)'};
+ else if(liveChk.matchesCollege) emailHint = {text:`Verified via ${COLLEGE_EMAIL[me.college]} ✓`, color:'var(--accent-text)'};
+ else if(liveChk.valid && liveChk.academic) emailHint = {text:'Verified via academic email ✓', color:'var(--accent-text)'};
+ else if(liveChk.valid) emailHint = {text:`Tip: use your ${me.college} email (…@${COLLEGE_EMAIL[me.college]||'college.edu'})`, color:'var(--amber-text)'};
+
+ /* ---------- screens ---------- */
+
+ const Home = (
+  <div className="flex-1 flex flex-col justify-center px-6 pb-12">
+   <div className="anim-fadeUp">
+    <h1 className="font-display text-[32px] leading-tight tracking-tight" style={{color:'var(--text)'}}>Where are you<br/>heading?</h1>
+    <p className="text-sm mt-2" style={{color:'var(--muted)'}}>Find a trusted travel buddy from your college.</p>
+   </div>
+
+   <div className="tc mt-8 rounded-[30px] border overflow-hidden anim-fadeUp" style={{background:'var(--card)', borderColor:'var(--line)', boxShadow:'var(--card-shadow)', animationDelay:'90ms'}}>
+    <div className="px-5 pt-4 pb-2">
+     <Label>From</Label>
+     <Sel value={search.from} onChange={v=>setSearch(s=>({...s,from:v}))} options={COLLEGES}/>
+    </div>
+    <div className="flex items-center gap-3 px-5">
+     <svg className="flex-1 h-[3px]" preserveAspectRatio="none">
+      <line x1="0" y1="1.5" x2="100%" y2="1.5" stroke="var(--line)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="1 7" className="dash-flow"/>
+     </svg>
+     <span className="bob tc h-7 w-7 rounded-full flex items-center justify-center border" style={{background:'var(--accent-soft)', color:'var(--accent-text)', borderColor:'var(--accent-line)'}}>
+      <Ic n="arrowDown" className="w-3.5 h-3.5"/>
+     </span>
+     <svg className="flex-1 h-[3px]" preserveAspectRatio="none">
+      <line x1="0" y1="1.5" x2="100%" y2="1.5" stroke="var(--line)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="1 7" className="dash-flow"/>
+     </svg>
+    </div>
+    <div className="px-5 pt-2 pb-3">
+     <Label>To</Label>
+     <Sel value={search.to} onChange={v=>setSearch(s=>({...s,to:v}))} options={CITIES}/>
+    </div>
+    <div className="tc border-t px-5 py-3 flex flex-wrap items-center justify-between gap-2" style={{borderColor:'var(--line2)'}}>
+     <div className="flex items-center gap-2"><Ic n="calendar" className="w-4 h-4" style={{color:'var(--faint)'}}/><Label className="!mb-0">Date</Label></div>
+     <DateFields d={search} set={p=>setSearch(s=>({...s,...p}))}/>
+    </div>
+   </div>
+
+   <div className="mt-6 space-y-4 anim-fadeUp" style={{animationDelay:'160ms'}}>
+    <ToggleRow label="Include return trip" on={search.returnTrip} set={v=>setSearch(s=>({...s,returnTrip:v}))}/>
+    <div>
+     <ToggleRow label="Ghost Mode" helper="Browse without appearing in search results." on={me.ghost} set={v=>setMe(m=>({...m,ghost:v}))}/>
+     {me.ghost && <GhostNote>You are browsing invisibly.</GhostNote>}
+    </div>
+   </div>
+
+   <button onClick={find} className="anim-fadeUp mt-7 w-full rounded-full text-white py-3.5 text-[15px] font-medium tracking-wide transition-all duration-300 hover:-translate-y-0.5 active:scale-[.98]"
+    style={{background:'var(--accent)', boxShadow:'var(--btn-shadow)', animationDelay:'220ms'}}
+    onMouseEnter={e=>e.currentTarget.style.background='var(--accent-strong)'}
+    onMouseLeave={e=>e.currentTarget.style.background='var(--accent)'}>
+    Find companions
+   </button>
+
+   <div className="mt-6 flex items-center justify-center gap-4 text-xs anim-fadeUp" style={{animationDelay:'280ms', color:'var(--faint)'}}>
+    {recent && (
+     <button onClick={()=>{setSearch(s=>({...s,from:recent.from,to:recent.to})); find();}} className="transition-colors hover:opacity-70">
+      Recent: {recent.from} → {recent.to}
+     </button>
+    )}
+    {!me.name && (
+     <button onClick={openProfile} className="transition-colors hover:opacity-70">New here? Create your profile →</button>
+    )}
+   </div>
+  </div>
+ );
+
+ const Results = (
+  <div className="px-5 pt-5 pb-24">
+   <div className="flex items-center gap-3 anim-fadeUp">
+    <RoundBtn onClick={()=>setScreen('home')} title="Back"><Ic n="arrowLeft"/></RoundBtn>
+    <div className="flex-1 min-w-0">
+     <div className="font-display text-lg tracking-tight truncate" style={{color:'var(--text)'}}>{shortFrom(search.from)} → {search.to}</div>
+     <div className="text-xs mt-0.5" style={{color:'var(--faint)'}}>{fmtDate(search)}{search.returnTrip && ' · incl. return'}</div>
+    </div>
+    <RoundBtn onClick={()=>setScreen('home')} title="Edit search"><Ic n="pencil" className="w-3.5 h-3.5"/></RoundBtn>
+   </div>
+
+   {me.ghost && (
+    <div className="tc anim-fadeUp mt-3 inline-flex items-center gap-1.5 text-[11px] rounded-full px-3 py-1.5 border" style={{color:'var(--accent-text)', background:'var(--accent-soft)', borderColor:'var(--accent-line)'}}>
+     <Ic n="ghost" className="w-3 h-3"/> Browsing invisibly
+    </div>
+   )}
+
+   <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-5 px-5 py-4">
+    {FILTERS.map(f=>(
+     <Pill key={f} active={filter===f} onClick={()=>onFilter(f)}>
+      {MODES.includes(f) && <Ic n={modeIcon(f)} className="w-3.5 h-3.5 inline mr-1 -mt-0.5"/>}
+      {f}
+     </Pill>
+    ))}
+   </div>
+
+   <div className="text-xs mb-3" style={{color:'var(--faint)'}}>{list.length} companion{list.length!==1?'s':''} · sorted by rating</div>
+
+   <div key={filter+search.from+search.to} className="space-y-3">
+    {list.map((b,i)=>{
+     const st = requests[b.id];
+     return (
+      <div key={b.id} onClick={()=>setSelected(b.id)}
+       className="tc anim-fadeUp cursor-pointer rounded-[26px] border p-4 transition-all duration-300 hover:-translate-y-1"
+       style={{
+        animationDelay:`${i*60}ms`,
+        background: b.you?'var(--accent-soft)':'var(--card)',
+        borderColor: b.you?'var(--accent-line)':'var(--line)',
+        boxShadow:'var(--soft-shadow)',
+       }}
+       onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--accent-line)'; e.currentTarget.style.boxShadow='var(--card-shadow)';}}
+       onMouseLeave={e=>{e.currentTarget.style.borderColor=b.you?'var(--accent-line)':'var(--line)'; e.currentTarget.style.boxShadow='var(--soft-shadow)';}}>
+       <div className="flex items-start gap-3">
+        <Avatar name={b.name}/>
+        <div className="flex-1 min-w-0">
+         <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="font-medium text-[15px]" style={{color:'var(--text)'}}>{b.name}</span>
+          <VerifiedChip/>
+          {b.you && <span className="text-[10px] font-medium text-white rounded-full px-1.5 py-0.5" style={{background:'var(--accent)'}}>You</span>}
+         </div>
+         <div className="text-xs mt-0.5" style={{color:'var(--faint)'}}>{b.college}</div>
+         <Rating b={b} className="mt-1"/>
+        </div>
+        {b.roundTrip && (
+         <span className="tc inline-flex items-center gap-1 text-[10px] border rounded-full px-2 py-1 whitespace-nowrap" style={{color:'var(--muted)', borderColor:'var(--line)'}}><Ic n="repeat" className="w-3 h-3"/>Round trip</span>
+        )}
+       </div>
+
+       <div className="mt-3 flex items-center justify-between text-sm">
+        <span className="flex items-center gap-1.5" style={{color:'var(--text)'}}>{shortFrom(b.from)} <Ic n="arrowRight" className="w-3.5 h-3.5" style={{color:'var(--faint)'}}/> {b.to}</span>
+        <span className="flex items-center gap-1.5 text-xs" style={{color:'var(--faint)'}}>{fmtDate(b.date)} · <Ic n={modeIcon(b.mode)} className="w-4 h-4"/> {b.mode}</span>
+       </div>
+
+       <div className="mt-3 flex flex-wrap gap-1.5">
+        {b.luggage.map(l=><Chip key={l}><Ic n="backpack" className="w-3 h-3"/>{l}</Chip>)}
+        {b.vibes.map(v=><Chip key={v}>{v}</Chip>)}
+       </div>
+
+       <div className="mt-3 pt-3 border-t flex items-center justify-between" style={{borderColor:'var(--line2)'}}>
+        <span className="text-[11px]" style={{color:'var(--faint)'}}>{b.genderPref}</span>
+        {b.you ? <span className="text-xs font-medium" style={{color:'var(--accent-text)'}}>Your trip</span> :
+         st==='accepted' ? <span onClick={e=>{e.stopPropagation(); openChat(b);}} className="text-xs font-medium text-white rounded-full px-4 py-2 cursor-pointer transition-transform active:scale-95" style={{background:'var(--accent)'}}>Open chat</span> :
+         st==='pending' ? <span className="tc inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-4 py-2 border" style={{color:'var(--amber-text)', background:'var(--amber-soft)', borderColor:'var(--amber-line)'}}><span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"/>Request sent</span> :
+         <span onClick={e=>{e.stopPropagation(); request(b);}} className="tc text-xs font-medium rounded-full px-4 py-2 border cursor-pointer transition-all active:scale-95 hover:shadow-sm" style={{color:'var(--accent-text)', borderColor:'var(--accent-line)'}}>Request to join</span>}
+       </div>
+      </div>
+     );
+    })}
+   </div>
+
+   {list.length===0 && (
+    <div className="text-center py-16 anim-fadeUp">
+     <div className="tc mx-auto h-14 w-14 rounded-full flex items-center justify-center" style={{background:'var(--chip)', color:'var(--faint)'}}><Ic n="compass" className="w-6 h-6"/></div>
+     <div className="mt-4 text-sm" style={{color:'var(--muted)'}}>No companions found yet.</div>
+     <div className="text-xs mt-1" style={{color:'var(--faint)'}}>Try changing your date or destination.</div>
+     <div className="mt-4 flex justify-center gap-2">
+      {filter!=='All' && <button onClick={()=>setFilter('All')} className="tc text-xs font-medium border rounded-full px-4 py-2 transition-all active:scale-95" style={{borderColor:'var(--line)', color:'var(--muted)', background:'var(--card)'}}>Clear filters</button>}
+      <button onClick={()=>setScreen('home')} className="tc text-xs font-medium border rounded-full px-4 py-2 transition-all active:scale-95" style={{borderColor:'var(--line)', color:'var(--muted)', background:'var(--card)'}}>Edit search</button>
+     </div>
+    </div>
+   )}
+  </div>
+ );
+
+ const Inbox = (
+  <div className="px-5 pt-5 pb-24 anim-fadeUp">
+   <div className="flex items-center gap-3">
+    <RoundBtn onClick={()=>setScreen('home')} title="Back"><Ic n="arrowLeft"/></RoundBtn>
+    <div>
+     <div className="font-display text-xl tracking-tight" style={{color:'var(--text)'}}>Requests</div>
+     <div className="text-xs" style={{color:'var(--faint)'}}>People who want to join your trips.</div>
+    </div>
+   </div>
+
+   {inbox.length===0 && (
+    <div className="text-center py-16 anim-fadeUp">
+     <div className="tc mx-auto h-14 w-14 rounded-full flex items-center justify-center" style={{background:'var(--chip)', color:'var(--faint)'}}><Ic n="inbox" className="w-6 h-6"/></div>
+     <div className="mt-4 text-sm" style={{color:'var(--muted)'}}>No requests yet.</div>
+     <div className="text-xs mt-1" style={{color:'var(--faint)'}}>Publish a trip and students will request to join you.</div>
+     <button onClick={openCreate} className="tc mt-4 text-xs font-medium border rounded-full px-4 py-2 transition-all active:scale-95" style={{borderColor:'var(--line)', color:'var(--muted)', background:'var(--card)'}}>Create a trip</button>
+    </div>
+   )}
+
+   <div className="mt-5 space-y-3">
+    {inbox.map((r,i)=>(
+     <div key={r.id} className="tc anim-fadeUp rounded-[26px] border p-4" style={{animationDelay:`${i*60}ms`, background:'var(--card)', borderColor:'var(--line)', boxShadow:'var(--soft-shadow)'}}>
+      <div className="flex items-start gap-3">
+       <Avatar name={r.name}/>
+       <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 flex-wrap">
+         <span className="font-medium text-[15px]" style={{color:'var(--text)'}}>{r.name}</span>
+         <VerifiedChip/>
+        </div>
+        <div className="text-xs mt-0.5" style={{color:'var(--faint)'}}>{r.college}</div>
+        <Rating b={r} className="mt-1"/>
+       </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between text-sm">
+       <span className="flex items-center gap-1.5" style={{color:'var(--text)'}}>{shortFrom(r.from)} <Ic n="arrowRight" className="w-3.5 h-3.5" style={{color:'var(--faint)'}}/> {r.to}</span>
+       <span className="flex items-center gap-1.5 text-xs" style={{color:'var(--faint)'}}>{fmtDate(r.date)} · <Ic n={modeIcon(r.mode)} className="w-4 h-4"/> {r.mode}</span>
+      </div>
+
+      <div className="mt-3 rounded-2xl px-3 py-2 text-sm italic" style={{background:'var(--chip)', color:'var(--muted)'}}>“{r.msg}”</div>
+
+      <div className="mt-3 pt-3 border-t flex gap-2 justify-end" style={{borderColor:'var(--line2)'}}>
+       {r.status==='pending' ? (
+        <>
+         <button onClick={()=>declineReq(r.id)} className="tc text-xs font-medium border rounded-full px-4 py-2 transition-all active:scale-95" style={{borderColor:'var(--line)', color:'var(--muted)', background:'var(--card)'}}>Decline</button>
+         <button onClick={()=>acceptReq(r.id)} className="text-xs font-medium text-white rounded-full px-4 py-2 transition-all active:scale-95" style={{background:'var(--accent)', boxShadow:'var(--btn-shadow)'}}>Accept</button>
+        </>
+       ) : (
+        <button onClick={()=>openChat(r)} className="text-xs font-medium text-white rounded-full px-4 py-2 transition-all active:scale-95" style={{background:'var(--accent)', boxShadow:'var(--btn-shadow)'}}>Open chat</button>
+       )}
+      </div>
+     </div>
+    ))}
+   </div>
+  </div>
+ );
+
+ const Chat = cb && (
+  <div className="flex-1 flex flex-col min-h-0">
+   <div className="px-4 pt-3 pb-2 flex items-center gap-2 border-b" style={{borderColor:'var(--line2)'}}>
+    <button onClick={()=>setScreen('results')} className="tc h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-90" style={{color:'var(--muted)'}}><Ic n="arrowLeft"/></button>
+
+    <button onClick={()=>setSelected(cb.id)} className="tc group flex-1 flex items-center gap-3 min-w-0 rounded-2xl px-2 py-1.5 transition-colors duration-300 hover:bg-[var(--chip)]" title="View profile">
+     <div className="transition-transform duration-300 group-hover:scale-105"><Avatar name={cb.name} size="h-9 w-9 text-xs"/></div>
+     <div className="flex-1 min-w-0 text-left">
+      <div className="text-sm font-medium flex items-center gap-1.5" style={{color:'var(--text)'}}>{cb.name}<Ic n="badge" className="w-3.5 h-3.5" style={{color:'var(--accent-text)'}}/></div>
+      <Rating b={cb}/>
+     </div>
+     <Ic n="chevronUp" className="w-4 h-4 transition-transform duration-300 group-hover:-translate-y-0.5" style={{color:'var(--faint)'}}/>
+    </button>
+   </div>
+
+   <div className="mx-4 mt-3 rounded-3xl px-4 py-3 anim-fadeUp text-white" style={{background:'var(--accent)', boxShadow:'var(--btn-shadow)'}}>
+    <div className="flex items-center gap-1.5 text-sm font-medium"><Ic n="check" className="w-4 h-4"/>Trip confirmed</div>
+    <div className="text-[11px] mt-0.5 opacity-80">{fmtDate(cb.date)} · {shortFrom(cb.from)} → {cb.to} · {cb.mode}</div>
+   </div>
+
+   <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 space-y-2.5">
+    {(msgs[cb.id]||[]).map((m,i)=>(
+     m.from==='sys'
+      ? <div key={i} className="flex justify-center"><span className="tc anim-popIn text-[11px] rounded-full px-3 py-1.5" style={{background:'var(--chip)', color:'var(--muted)'}}>{m.text}</span></div>
+      : <div key={i} className={`anim-popIn max-w-[78%] px-3.5 py-2 text-sm leading-relaxed ${m.from==='me'?'ml-auto text-white rounded-2xl rounded-br-md':'rounded-2xl rounded-bl-md'}`}
+         style={m.from==='me'?{background:'var(--accent)', boxShadow:'var(--soft-shadow)'}:{background:'var(--chip)', color:'var(--text)'}}>
+         {m.kind==='loc' && <Ic n="pin" className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5"/>}
+         {m.kind==='ticket' && <Ic n="ticket" className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5"/>}
+         {m.text}
+        </div>
+    ))}
+    {typing===cb.id && (
+     <div className="anim-popIn w-fit px-3.5 py-2.5 rounded-2xl rounded-bl-md flex gap-1" style={{background:'var(--chip)'}}>
+      {[0,1,2].map(i=><span key={i} className="typing h-1.5 w-1.5 rounded-full" style={{background:'var(--faint)', animationDelay:`${i*.18}s`}}/>)}
+     </div>
+    )}
+    <div ref={chatEndRef}/>
+   </div>
+
+   <div className="flex gap-2 px-4 pb-2">
+    <button onClick={()=>quick('loc')} className="tc flex items-center gap-1.5 text-xs border rounded-full px-3 py-1.5 transition-all active:scale-95" style={{borderColor:'var(--line)', color:'var(--muted)', background:'var(--card)'}}><Ic n="pin" className="w-3.5 h-3.5"/>Share location</button>
+    <button onClick={()=>quick('ticket')} className="tc flex items-center gap-1.5 text-xs border rounded-full px-3 py-1.5 transition-all active:scale-95" style={{borderColor:'var(--line)', color:'var(--muted)', background:'var(--card)'}}><Ic n="ticket" className="w-3.5 h-3.5"/>Share ticket</button>
+    <button onClick={()=>quick('split')} className="tc flex items-center gap-1.5 text-xs border rounded-full px-3 py-1.5 transition-all active:scale-95" style={{borderColor:'var(--line)', color:'var(--muted)', background:'var(--card)'}}><Ic n="rupee" className="w-3.5 h-3.5"/>Split fare</button>
+   </div>
+
+   <div className="px-4 pb-5 pt-1 flex gap-2">
+    <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&sendMsg()} placeholder="Message…"
+     className="tc flex-1 rounded-full border px-4 py-2.5 text-sm focus:outline-none transition-colors"
+     style={{background:'var(--card)', borderColor:'var(--line)', color:'var(--text)'}}
+     onFocus={e=>e.target.style.borderColor='var(--accent-line)'}
+     onBlur={e=>e.target.style.borderColor='var(--line)'}/>
+    <button onClick={sendMsg} className="h-10 w-10 rounded-full text-white flex items-center justify-center transition-all duration-300 active:scale-75 hover:-translate-y-px" style={{background:'var(--accent)', boxShadow:'var(--btn-shadow)'}}><Ic n="send" className="w-4 h-4"/></button>
+   </div>
+  </div>
+ );
+
+ const Create = trip && (
+  <div className="px-5 pt-5 pb-24 anim-fadeUp">
+   <div className="flex items-center gap-3">
+    <RoundBtn onClick={()=>setScreen(prev==='create'?'home':prev)} title="Back"><Ic n="arrowLeft"/></RoundBtn>
+    <div>
+     <div className="font-display text-xl tracking-tight" style={{color:'var(--text)'}}>Create trip</div>
+     <div className="text-xs" style={{color:'var(--faint)'}}>Let others find you on this route.</div>
+    </div>
+   </div>
+
+   <div className="tc mt-5 rounded-[26px] border p-5 space-y-4" style={{background:'var(--card)', borderColor:'var(--line)', boxShadow:'var(--soft-shadow)'}}>
+    <div><Label>From</Label><Sel value={trip.from} onChange={v=>setTrip(t=>({...t,from:v}))} options={COLLEGES}/></div>
+    <div><Label>To</Label><Sel value={trip.to} onChange={v=>setTrip(t=>({...t,to:v}))} options={CITIES}/></div>
+    <div><Label>Date</Label><DateFields d={trip} set={p=>setTrip(t=>({...t,...p}))}/></div>
+   </div>
+
+   <div className="mt-5">
+    <Label>Travel mode</Label>
+    <div className="flex flex-wrap gap-2">
+     {MODES.map(m=>(
+      <button key={m} onClick={()=>setTrip(t=>({...t,mode:m}))} className="tc flex items-center gap-1.5 px-4 py-2 rounded-full text-xs border transition-all duration-300 active:scale-95"
+       style={trip.mode===m?{background:'var(--accent)', color:'#fff', borderColor:'transparent', boxShadow:'var(--soft-shadow)'}:{background:'var(--card)', color:'var(--muted)', borderColor:'var(--line)'}}>
+       <Ic n={modeIcon(m)} className="w-4 h-4"/>{m}
+      </button>
+     ))}
+    </div>
+   </div>
+
+   <div className="mt-5">
+    <Label>Luggage · select all that apply</Label>
+    <div className="flex flex-wrap gap-2">
+     {LUGGAGE.map(l=>{
+      const on = trip.luggage.includes(l);
+      return <button key={l} onClick={()=>setTrip(t=>({...t,luggage: on? t.luggage.filter(x=>x!==l) : [...t.luggage,l]}))}
+       className="tc flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs border transition-all duration-300 active:scale-95"
+       style={on?{background:'var(--accent)', color:'#fff', borderColor:'transparent', boxShadow:'var(--soft-shadow)'}:{background:'var(--card)', color:'var(--muted)', borderColor:'var(--line)'}}>
+       <Ic n="backpack" className="w-3.5 h-3.5"/>{l}{on && <Ic n="check" className="w-3 h-3"/>}
+      </button>;
+     })}
+    </div>
+   </div>
+
+   <div className="mt-5">
+    <Label>Travel vibe</Label>
+    <div className="flex flex-wrap gap-2">
+     {VIBES.map(v=>{
+      const on = trip.vibes.includes(v);
+      return <button key={v} onClick={()=>setTrip(t=>({...t,vibes: on? t.vibes.filter(x=>x!==v) : [...t.vibes,v]}))}
+       className="tc px-3.5 py-2 rounded-full text-xs border transition-all duration-300 active:scale-95"
+       style={on?{background:'var(--accent)', color:'#fff', borderColor:'transparent', boxShadow:'var(--soft-shadow)'}:{background:'var(--card)', color:'var(--muted)', borderColor:'var(--line)'}}>{v}</button>;
+     })}
+    </div>
+   </div>
+
+   <div className="mt-5">
+    <Label>Gender preference</Label>
+    <div className="flex gap-2">
+     {['Open to all','Same gender only'].map(g=>(
+      <button key={g} onClick={()=>setTrip(t=>({...t,genderPref:g}))} className="tc px-4 py-2 rounded-full text-xs border transition-all duration-300 active:scale-95"
+       style={trip.genderPref===g?{background:'var(--accent)', color:'#fff', borderColor:'transparent', boxShadow:'var(--soft-shadow)'}:{background:'var(--card)', color:'var(--muted)', borderColor:'var(--line)'}}>{g}</button>
+     ))}
+    </div>
+   </div>
+
+   <div className="mt-6 space-y-4">
+    <ToggleRow label="Open to return trip" on={trip.roundTrip} set={v=>setTrip(t=>({...t,roundTrip:v}))}/>
+    <ToggleRow label="Make my trip visible" helper="Others can find and request to join you." on={trip.visible} set={v=>setTrip(t=>({...t,visible:v}))}/>
+   </div>
+
+   {me.ghost && <GhostNote>Ghost Mode is on. Your trip will not appear in search results.</GhostNote>}
+   {!me.verified && (
+    <div className="tc anim-fadeUp mt-2 flex items-center gap-2 text-xs rounded-2xl px-3 py-2 border" style={{color:'var(--amber-text)', background:'var(--amber-soft)', borderColor:'var(--amber-line)'}}>
+     <Ic n="shield" className="w-3.5 h-3.5 shrink-0"/>Not verified yet — add your college email in your profile.
+    </div>
+   )}
+
+   <button onClick={publish} className="mt-7 w-full rounded-full text-white py-3.5 text-[15px] font-medium tracking-wide transition-all duration-300 hover:-translate-y-0.5 active:scale-[.98]" style={{background:'var(--accent)', boxShadow:'var(--btn-shadow)'}}>
+    Publish trip
+   </button>
+  </div>
+ );
+
+ const Profile = (
+  <div className="px-5 pt-5 pb-24 anim-fadeUp">
+   <div className="flex items-center gap-3">
+    <RoundBtn onClick={()=>setScreen(prev==='profile'?'home':prev)} title="Back"><Ic n="arrowLeft"/></RoundBtn>
+    <div className="font-display text-xl tracking-tight" style={{color:'var(--text)'}}>{me.name ? 'Your profile' : 'Create your profile'}</div>
+   </div>
+
+   <div className="mt-6 flex flex-col items-center">
+    {me.name
+     ? <div className="anim-popIn h-16 w-16 rounded-full flex items-center justify-center text-lg font-medium text-white relative" style={{background:'var(--accent)', boxShadow:'var(--btn-shadow)'}}>
+        {initials(me.name)}
+        {me.verified && <span className="anim-popIn absolute -bottom-1 -right-1 h-5 w-5 rounded-full text-white flex items-center justify-center border-2" style={{background:'var(--accent)', borderColor:'var(--bg)'}}><Ic n="check" className="w-3 h-3"/></span>}
+       </div>
+     : <div className="tc h-16 w-16 rounded-full border-2 border-dashed flex items-center justify-center" style={{borderColor:'var(--line)', color:'var(--faint)'}}><Ic n="user" className="w-6 h-6"/></div>}
+    {me.name && (
+     me.verified
+      ? <div className="tc anim-popIn mt-3 inline-flex items-center gap-1 text-[11px] font-medium rounded-full px-2.5 py-1 border" style={{color:'var(--accent-text)', background:'var(--accent-soft)', borderColor:'var(--accent-line)'}}><Ic n="badge" className="w-3.5 h-3.5"/>Verified student · {me.college}</div>
+      : <div className="tc mt-3 inline-flex items-center gap-1 text-[11px] font-medium rounded-full px-2.5 py-1 border" style={{color:'var(--amber-text)', background:'var(--amber-soft)', borderColor:'var(--amber-line)'}}><Ic n="shield" className="w-3.5 h-3.5"/>Not verified yet</div>
+    )}
+   </div>
+
+   {!me.name && <p className="text-center text-xs mt-4 leading-relaxed" style={{color:'var(--faint)'}}>Your details help buddies know who they're<br/>traveling with. Everything stays minimal.</p>}
+
+   <div className="tc mt-6 rounded-[26px] border p-5 space-y-4" style={{background:'var(--card)', borderColor:'var(--line)', boxShadow:'var(--soft-shadow)'}}>
+    <div>
+     <Label>Your name</Label>
+     <input value={me.name} onChange={e=>setMe(m=>({...m,name:e.target.value}))} placeholder="e.g. Aisha Verma"
+      className="tc w-full rounded-2xl border px-4 py-3 text-sm focus:outline-none transition-colors"
+      style={{background:'var(--card)', borderColor:'var(--line)', color:'var(--text)'}}
+      onFocus={e=>e.target.style.borderColor='var(--accent-line)'}
+      onBlur={e=>e.target.style.borderColor='var(--line)'}/>
+    </div>
+
+    <div>
+     <Label>College email · for verification</Label>
+     <div className="relative">
+      <Ic n="mail" className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{color:'var(--faint)'}}/>
+      <input value={me.email} onChange={e=>setMe(m=>({...m,email:e.target.value}))} placeholder={`you@${COLLEGE_EMAIL[me.college]||'college.edu'}`}
+       className="tc w-full rounded-2xl border pl-10 pr-10 py-3 text-sm focus:outline-none transition-colors"
+       style={{background:'var(--card)', borderColor: liveChk.matchesCollege ? 'var(--accent-line)' : 'var(--line)', color:'var(--text)'}}
+       onFocus={e=>e.target.style.borderColor='var(--accent-line)'}
+       onBlur={e=>e.target.style.borderColor= liveChk.matchesCollege ? 'var(--accent-line)' : 'var(--line)'}/>
+      {liveChk.verified && <Ic n="badge" className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 anim-popIn" style={{color:'var(--accent-text)'}}/>}
+     </div>
+     <div className="text-xs mt-1.5 tc" style={{color: emailHint.color}}>{emailHint.text}</div>
+    </div>
+
+    <div><Label>College</Label><Sel value={me.college} onChange={v=>setMe(m=>({...m,college:v}))} options={COLLEGES}/></div>
+    <div>
+     <Label>Gender · used for same-gender matching</Label>
+     <div className="flex flex-wrap gap-2">
+      {GENDERS.map(g=>(
+       <button key={g} onClick={()=>setMe(m=>({...m,gender:g}))} className="tc px-3.5 py-2 rounded-full text-xs border transition-all duration-300 active:scale-95"
+        style={me.gender===g?{background:'var(--accent)', color:'#fff', borderColor:'transparent', boxShadow:'var(--soft-shadow)'}:{background:'var(--card)', color:'var(--muted)', borderColor:'var(--line)'}}>{g}</button>
+      ))}
+     </div>
+    </div>
+   </div>
+
+   <div className="tc mt-4 rounded-[26px] border p-5 space-y-4" style={{background:'var(--card)', borderColor:'var(--line)', boxShadow:'var(--soft-shadow)'}}>
+    <div>
+     <Label>Your travel vibe</Label>
+     <div className="flex flex-wrap gap-2">
+      {VIBES.map(v=>{
+       const on = me.vibes.includes(v);
+       return <button key={v} onClick={()=>setMe(m=>({...m,vibes: on? m.vibes.filter(x=>x!==v) : [...m.vibes,v]}))}
+        className="tc px-3.5 py-2 rounded-full text-xs border transition-all duration-300 active:scale-95"
+        style={on?{background:'var(--accent)', color:'#fff', borderColor:'transparent', boxShadow:'var(--soft-shadow)'}:{background:'var(--card)', color:'var(--muted)', borderColor:'var(--line)'}}>{v}</button>;
+      })}
+     </div>
+    </div>
+    <div>
+     <Label>Companion preference</Label>
+     <div className="flex gap-2">
+      {['Open to all','Same gender only'].map(g=>(
+       <button key={g} onClick={()=>setMe(m=>({...m,genderPref:g}))} className="tc px-4 py-2 rounded-full text-xs border transition-all duration-300 active:scale-95"
+        style={me.genderPref===g?{background:'var(--accent)', color:'#fff', borderColor:'transparent', boxShadow:'var(--soft-shadow)'}:{background:'var(--card)', color:'var(--muted)', borderColor:'var(--line)'}}>{g}</button>
+      ))}
+     </div>
+    </div>
+    <div className="pt-1 border-t" style={{borderColor:'var(--line2)'}}>
+     <ToggleRow label="Ghost Mode" helper="Browse without appearing in search results." on={me.ghost} set={v=>setMe(m=>({...m,ghost:v}))}/>
+    </div>
+   </div>
+
+   <div className="mt-4 grid grid-cols-2 gap-3">
+    <div className="tc rounded-3xl border p-4 text-center" style={{background:'var(--card2)', borderColor:'var(--line2)'}}>
+     <div className="flex items-center justify-center gap-1 text-lg font-display min-h-[28px]" style={{color: me.name ? 'var(--accent-text)' : 'var(--faint)'}}>
+      {me.name ? <span className="text-sm font-medium">New traveler</span> : '—'}
+     </div>
+     <div className="text-[10px] uppercase tracking-widest mt-1" style={{color:'var(--faint)'}}>Rating</div>
+    </div>
+    <div className="tc rounded-3xl border p-4 text-center" style={{background:'var(--card2)', borderColor:'var(--line2)'}}>
+     <div className="text-lg font-display" style={{color:'var(--text)'}}>{mine.length}</div>
+     <div className="text-[10px] uppercase tracking-widest mt-1" style={{color:'var(--faint)'}}>Trips posted</div>
+    </div>
+   </div>
+
+   <button onClick={saveProfile} className="mt-7 w-full rounded-full text-white py-3.5 text-[15px] font-medium tracking-wide transition-all duration-300 hover:-translate-y-0.5 active:scale-[.98]" style={{background:'var(--accent)', boxShadow:'var(--btn-shadow)'}}>
+    {me.name ? 'Save changes' : 'Save profile'}
+   </button>
+  </div>
+ );
+
+ /* ---------- buddy sheet ---------- */
+ const BuddySheet = sel && (()=>{ const st = requests[sel.id]; return (
+  <div className="fixed inset-0 z-50 flex justify-center">
+   <div className="absolute inset-0 anim-fadeIn backdrop-blur-[2px]" style={{background:'rgba(10,8,28,.45)'}} onClick={()=>setSelected(null)}/>
+   <div className="relative w-full max-w-md">
+    <div className="tc absolute bottom-0 inset-x-0 max-h-[88dvh] overflow-y-auto no-scrollbar rounded-t-[32px] p-6 pb-8 anim-slideUp" style={{background:'var(--card)', boxShadow:'var(--card-shadow)'}}>
+     <div className="mx-auto h-1 w-10 rounded-full mb-5" style={{background:'var(--line)'}}/>
+     <div className="flex items-start gap-3.5">
+      <Avatar name={sel.name} size="h-14 w-14 text-lg"/>
+      <div>
+       <div className="flex items-center gap-2 flex-wrap">
+        <span className="font-display text-lg tracking-tight" style={{color:'var(--text)'}}>{sel.name}</span>
+        <VerifiedChip/>
+       </div>
+       <div className="text-xs mt-0.5" style={{color:'var(--faint)'}}>Verified student · {sel.college}</div>
+       <Rating b={sel} className="mt-1.5"/>
+      </div>
+     </div>
+
+     <div className="tc mt-5 grid grid-cols-2 gap-x-4 gap-y-4 rounded-3xl border p-4 text-sm" style={{background:'var(--card2)', borderColor:'var(--line2)', color:'var(--text)'}}>
+      <div><Label className="!mb-0.5">From</Label>{sel.from}</div>
+      <div><Label className="!mb-0.5">To</Label>{sel.to}</div>
+      <div><Label className="!mb-0.5">Date</Label>{fmtDate(sel.date)}</div>
+      <div><Label className="!mb-0.5">Mode</Label><span className="inline-flex items-center gap-1.5"><Ic n={modeIcon(sel.mode)} className="w-4 h-4" style={{color:'var(--faint)'}}/>{sel.mode}</span></div>
+      <div><Label className="!mb-0.5">Luggage</Label>{sel.luggage.join(', ')}</div>
+      <div><Label className="!mb-0.5">Trip type</Label>{sel.roundTrip?'Round trip':'One way'}</div>
+     </div>
+
+     <div className="mt-5">
+      <Label>Travel vibe</Label>
+      <div className="flex flex-wrap gap-1.5">{sel.vibes.map(v=><Chip key={v}>{v}</Chip>)}</div>
+     </div>
+     <div className="mt-4 flex items-center justify-between text-sm">
+      <Label className="!mb-0">Companions</Label>
+      <span style={{color:'var(--text)'}}>{sel.genderPref}</span>
+     </div>
+
+     <div className="tc mt-5 flex items-start gap-2.5 rounded-3xl border p-3.5 text-xs leading-relaxed" style={{background:'var(--accent-soft)', borderColor:'var(--accent-line)', color:'var(--accent-text)'}}>
+      <Ic n="shield" className="w-4 h-4 shrink-0 mt-0.5"/>
+      Always verify travel details before meeting. via connects verified students, but personal safety is your responsibility.
+     </div>
+
+     <div className="mt-6 flex gap-2">
+      <button onClick={()=>setSelected(null)} className="tc px-5 rounded-full border text-sm transition-all active:scale-95" style={{borderColor:'var(--line)', color:'var(--muted)', background:'var(--card)'}}>Back</button>
+      {st==='accepted'
+       ? <button onClick={()=>openChat(sel)} className="flex-1 rounded-full text-white py-3 text-sm font-medium transition-all active:scale-[.98]" style={{background:'var(--accent)'}}>Open chat</button>
+       : st==='pending'
+       ? <button disabled className="tc flex-1 inline-flex items-center justify-center gap-2 rounded-full py-3 text-sm font-medium" style={{background:'var(--chip)', color:'var(--muted)'}}><span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"/>Request sent</button>
+       : <button onClick={()=>request(sel)} className="flex-1 rounded-full text-white py-3 text-sm font-medium transition-all active:scale-[.98]" style={{background:'var(--accent)', boxShadow:'var(--btn-shadow)'}}>Request to join</button>}
+     </div>
+    </div>
+   </div>
+  </div>
+ );})();
+
+ /* ---------- fare modal ---------- */
+ const FareModal = fareOpen && cb && (()=>{
+  const n = Math.max(0, parseFloat(fare)||0);
+  const half = Math.round(n/2);
+  return (
+   <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="absolute inset-0 anim-fadeIn backdrop-blur-[2px]" style={{background:'rgba(10,8,28,.45)'}} onClick={()=>setFareOpen(false)}/>
+    <div className="tc relative w-full max-w-md rounded-t-[32px] p-6 pb-8 anim-slideUp" style={{background:'var(--card)', boxShadow:'var(--card-shadow)'}}>
+     <div className="mx-auto h-1 w-10 rounded-full mb-5" style={{background:'var(--line)'}}/>
+     <div className="font-display text-lg tracking-tight" style={{color:'var(--text)'}}>Split fare</div>
+     <Label className="mt-5">Total fare</Label>
+     <div className="tc flex items-center gap-2 rounded-2xl border px-4 py-3 transition-colors" style={{background:'var(--card)', borderColor:'var(--line)'}}>
+      <span style={{color:'var(--faint)'}}>₹</span>
+      <input type="number" value={fare} onChange={e=>setFare(e.target.value)} className="w-full bg-transparent text-sm focus:outline-none" style={{color:'var(--text)'}}/>
+     </div>
+     <div className="mt-4 grid grid-cols-2 gap-3">
+      <div className="tc rounded-3xl border p-4" style={{background:'var(--card2)', borderColor:'var(--line2)'}}>
+       <div className="text-[10px] uppercase tracking-widest" style={{color:'var(--faint)'}}>You owe</div>
+       <div className="mt-1 font-display text-xl" style={{color:'var(--text)'}}>₹{half}</div>
+      </div>
+      <div className="tc rounded-3xl border p-4" style={{background:'var(--card2)', borderColor:'var(--line2)'}}>
+       <div className="text-[10px] uppercase tracking-widest" style={{color:'var(--faint)'}}>{cb.name.split(' ')[0]} owes</div>
+       <div className="mt-1 font-display text-xl" style={{color:'var(--text)'}}>₹{half}</div>
+      </div>
+     </div>
+     <button onClick={markPaid} className="mt-5 w-full rounded-full text-white py-3 text-sm font-medium transition-all active:scale-[.98]" style={{background:'var(--accent)', boxShadow:'var(--btn-shadow)'}}>Mark as paid</button>
+     <button onClick={()=>setFareOpen(false)} className="mt-2 w-full rounded-full py-2.5 text-sm transition-colors" style={{color:'var(--muted)'}}>Cancel</button>
+    </div>
+   </div>
+  );
+ })();
+
+ /* ---------- render ---------- */
+ return (
+  <div className="mx-auto max-w-md min-h-dvh flex flex-col relative sm:border-x tc" style={{borderColor:'var(--line2)'}}>
+   <header className="tc sticky top-0 z-30 backdrop-blur-md border-b" style={{background:'var(--header)', borderColor:'var(--line2)'}}>
+    <div className="flex items-center justify-between px-5 h-14">
+     <button onClick={()=>setScreen('home')} className="font-display font-semibold text-[22px] tracking-tight transition-transform active:scale-95" style={{color:'var(--text)'}}>via<span style={{color:'var(--accent)'}}>.</span></button>
+     <div className="flex items-center gap-2">
+      {screen!=='create' && (
+       <button onClick={openCreate} title="Create trip"
+        className="tc h-8 w-8 rounded-full border flex items-center justify-center transition-all duration-300 active:scale-90"
+        style={{background:'var(--card)', borderColor:'var(--line)', color:'var(--muted)'}}><Ic n="plus" className="w-4 h-4"/></button>
+      )}
+      {screen!=='inbox' && (
+       <button onClick={()=>go('inbox')} title="Requests"
+        className="tc relative h-8 w-8 rounded-full border flex items-center justify-center transition-all duration-300 active:scale-90"
+        style={{background:'var(--card)', borderColor:'var(--line)', color:'var(--muted)'}}>
+        <Ic n="inbox" className="w-4 h-4"/>
+        {pendingCount>0 && <span className="anim-popIn absolute -top-1 -right-1 h-4 min-w-[16px] px-0.5 rounded-full text-[9px] font-bold text-white flex items-center justify-center" style={{background:'var(--accent)'}}>{pendingCount}</span>}
+       </button>
+      )}
+      <button onClick={openProfile} className="relative transition-transform active:scale-90" title="Your profile">
+       {me.name
+        ? <div className="h-8 w-8 rounded-full text-white text-[11px] font-medium flex items-center justify-center" style={{background:'var(--accent)'}}>{initials(me.name)}</div>
+        : <div className="tc h-8 w-8 rounded-full border border-dashed flex items-center justify-center" style={{borderColor:'var(--line)', color:'var(--faint)'}}><Ic n="user" className="w-4 h-4"/></div>}
+       {me.ghost && <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2" style={{background:'var(--accent)', borderColor:'var(--bg)'}}/>}
+       {me.verified && <span className="anim-popIn absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center border-2" style={{background:'var(--accent)', borderColor:'var(--bg)'}}><Ic n="check" className="w-2 h-2"/></span>}
+      </button>
+      <ThemeToggle dark={dark} setDark={setDark}/>
+     </div>
+    </div>
+   </header>
+
+   <main className="flex-1 flex flex-col min-h-0">
+    {screen==='home' && Home}
+    {screen==='results' && Results}
+    {screen==='inbox' && Inbox}
+    {screen==='chat' && Chat}
+    {screen==='create' && Create}
+    {screen==='profile' && Profile}
+   </main>
+
+   {selected && BuddySheet}
+   {fareOpen && FareModal}
+
+   <div className="fixed bottom-6 inset-x-0 z-[70] flex flex-col items-center gap-2 pointer-events-none">
+    {toasts.map(t=>(
+     <div key={t.id} className="tc anim-popIn text-xs px-4 py-2.5 rounded-full" style={{background:'var(--text)', color:'var(--bg)', boxShadow:'var(--card-shadow)'}}>{t.t}</div>
+    ))}
+   </div>
+  </div>
+ );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
